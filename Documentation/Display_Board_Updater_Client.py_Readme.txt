@@ -1,0 +1,56 @@
+NAME: Display_Board_Updater_Client.py
+
+TYPE: Python Script
+
+PRIMARY LANGUAGE: Python 2.7
+
+AUTHOR: Justin Grimes
+
+ORIGINAL VERSION DATE: 1/14/2020
+
+CURRENT VERSION DATE: 1/21/2020
+
+VERSION: v2.1
+
+DEPENDENCIES:
+1. Python2.7 (https://www.python.org/download/releases/2.7/)
+2. Python Pip for Python 2.7 (https://pypi.org/project/pip/)
+3. pyPdf Module (https://pypi.org/project/pyPdf/)
+4. pdfsplit.py (https://github.com/mathandy/pdf-split/blob/master/pdfsplit.py)
+5. Adobe Reader DC (https://acrobat.adobe.com/us/en/acrobat/pdf-reader.html)
+
+DESCRIPTION: 
+This program is for preparing & displaying PDF reports in fullscreen on unattended workstations. 
+For example, you can use this program to create an up-to-date dashboard that rotates slides automatically.
+
+PURPOSE: 
+To display production schedule information and other event notifications to the shop floor in a consistent and reliable manner.
+
+INSTALLATION INSTRUCTIONS: 
+1. Copy the entire "Display_Board_Updater_Client" folder to the C:\ drive of the computer you wish to setup to display dashboards.
+2. Install all executable installation packages found in the "Dependencies" folder of the "Display_Board_Updater_Client" folder.
+3. Open Adobe Reader DC and select "Edit->Preferences".
+4. On the "Full Screen" tab of Adobe Reader DC Preferences, uncheck "Current Document Only"
+5. Uncheck "Alert when document requests full screen"
+6. Check "Loop after last page"
+7. Check "Advance every <blank> seconds" and specify number of seconds somewhere between 30 and 60.
+8. Set the "Default transition" dropdown box to "Wipe" and the "Direction" dropdown box to "Left".
+9. Check "Navigation controls direction"
+10. Check "Escape key exits"
+11. Press "Ok" and close Adobe Reader DC.
+12. Add a logon script to run "Display_Board_Updater_Client.py" with the proper path, refresh and expiration durations set as command line arguments.
+13. Ensure that the dashboard user running the script has read/write access to the path where dashboard PDFs are stored.
+14. Use the "s" or "split" arguments to specify if multi-pate PDFs should be chopped into separate files.
+
+NOTES:
+1. When the "s" argument is used; this script will automatically chop multi-page PDFs into separate files and then display each file separately.
+2. When the "s" argument IS NOT used; this script will rely on Adobe Reader DC "Full Screen Mode" to display each separate page of multi-page PDFs.
+3. To calculate what the "refresh time" and "expiration time" should be, consider how many pages each report should be, how often they are generated, and
+ how long they take to read.
+4. If you're not using the "s" argument, with a 10 page PDF that is regenerated once hourly you should consider using:
+ -30s display time in Adobe Reader,
+ -300s refresh time in Display_Board_Updater_Client,
+ -3659s expiration time in Display_Board_Updater_Client.
+ *Using these settings, each page will be displayed for 30s, each report will be displayed for 5m, and each report will be deleted after 1 hour.
+5. You can control the level of logging and verbosity of Display_Board_Updater_Client by using the l0, l1, l2, or v0, v1, v2 arguments (respectively).
+6. Use the "h" or "help" arguments to see available command line switches and usage examples.
