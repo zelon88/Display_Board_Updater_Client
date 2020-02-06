@@ -1,0 +1,4 @@
+Before using command line just open AcroRd32.exe/Acrobat.exe and go to Edit => Preferences => Full Screen and uncheck on Current document only. Then you can use the command line as 
+
+
+start "" /max "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader" /A "pagemode=FullScreen" "yourfile direction and name.pdf"

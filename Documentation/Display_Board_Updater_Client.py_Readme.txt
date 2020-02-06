@@ -8,9 +8,9 @@ AUTHOR: Justin Grimes
 
 ORIGINAL VERSION DATE: 1/14/2020
 
-CURRENT VERSION DATE: 1/21/2020
+CURRENT VERSION DATE: 2/6/2020
 
-VERSION: v2.1
+VERSION: v2.3
 
 DEPENDENCIES:
 1. Python2.7 (https://www.python.org/download/releases/2.7/)
@@ -54,3 +54,13 @@ NOTES:
  *Using these settings, each page will be displayed for 30s, each report will be displayed for 5m, and each report will be deleted after 1 hour.
 5. You can control the level of logging and verbosity of Display_Board_Updater_Client by using the l0, l1, l2, or v0, v1, v2 arguments (respectively).
 6. Use the "h" or "help" arguments to see available command line switches and usage examples.
+
+USAGE:
+  Display_Board_Updater_Client.py <path-to-documents> <time-to-display-each-document> <time-before-documents-are-deleted> <options>
+  Display_Board_Updater_Client.py C:\Example 180 3600 l0 v2
+  Display_Board_Updater_Client.py C:\Example 180 3600 split l2 v1
+  Display_Board_Updater_Client.py C:\Example 180 3600 s l2 v1
+  Display_Board_Updater_Client.py C:\Example 180 3600 l0 v0
+  Display_Board_Updater_Client.py C:\Example 180 3600 
+  Display_Board_Updater_Client.py help
+  Display_Board_Updater_Client.py h
