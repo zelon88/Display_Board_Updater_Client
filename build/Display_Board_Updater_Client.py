@@ -1,6 +1,6 @@
 # --------------------------------------------------
 # Display_Board_Updater_Client.py
-# v2.3 - 2/6/2020
+# v2.5 - 2/11/2020
 
 # Justin Grimes (@zelon88)
 #   https://www.HonestRepair.net
@@ -53,7 +53,7 @@
 
 # --------------------------------------------------
 # Load required modules and set global variables.
-import sys, getopt, time, datetime, os, shutil, errno
+import sys, getopt, time, datetime, os, shutil, errno, struct, ctypes
 
 # -----DEFAULT CONFIGURATION SETTINGS----- # 
 # The filename of this application.
@@ -61,7 +61,7 @@ progFileName = "Display_Board_Updater_Client.exe"
 # The full name of this application.
 progName = "Display_Board_Updater_Client"
 # The current version of this application.
-progVers = "v2.3"
+progVers = "v2.5"
 # A concise description of this application.
 progDesc = 'This program prepares the data created by Display_Board_Updater_Server and displays it in full screen for shop floor dashboards.'
 # Prefix standard log entries with the following string.
@@ -87,6 +87,12 @@ executionLimit = 0
 # The wait time is the number of seconds to wait for file locks and other time sensitive operations.
 # If you encounter errors with file locks, starting, or killing processes try increasing this value.
 waitTime = 2
+# The following boolean controls whether or not console output is centered in the command prompt window.
+centerConsoleOutput = True
+# The following value controls the characters to use for padding before writing console output.
+# If centerConsoleOutput is set to true, this would probably look best if left as a blank string.
+# Mainly useful for getting the start of console output away from the side of the screen. Otherwise it's very close.
+consolePadding = ''
 # The following equation should equal the number of seconds after start of program execution before the logo is redisplayed.
 # Set to 0 to never redisplay the logo. 
 logoRedisplayTimeLimit = 60 * 10 # 60sec x 10min = 10min
@@ -118,8 +124,11 @@ def setTime():
 # --------------------------------------------------
 # A function to print output to the console in a consistent manner.
 # Always returns 1.
-def printGracefully(logPrefix, message, realtime):
-  print (logPrefix+message+' on '+str(realtime)+'.'+"\n")
+def printGracefully(logPrefix, message, realtime, centerConsoleOutput):
+  if centerConsoleOutput == True: 
+    termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
+    print (consolePadding+logPrefix+message+' on '+str(realtime)+'.'+"\n").center(termWidth)
+  else: print (consolePadding+logPrefix+message+' on '+str(realtime)+'.'+"\n")
   return 1
 # --------------------------------------------------
 
@@ -128,8 +137,11 @@ def printGracefully(logPrefix, message, realtime):
 # The errorMessage will be displayed to the user, unless the s switch is set.
 # Note this uses sys.exit(), which not only kills this script but the entire interpreter.
 # Should never return anything because the interpreter should be dead before the return line.
-def dieGracefully(errorMessage, errorNumber, errorCounter):
-  print ('ERROR-'+str(errorCounter)+'!!! '+str(progName)+str(errorNumber)+': '+str(errorMessage)+' on '+str(realtime)+'!'+"\n")
+def dieGracefully(errorMessage, errorNumber, errorCounter, realtime, centerConsoleOutput):
+  if centerConsoleOutput == True:
+    termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
+    print (consolePadding+'ERROR-'+str(errorCounter)+'!!! '+str(progName)+str(errorNumber)+': '+str(errorMessage)+' on '+str(realtime)+'!'+"\n").center(termWidth)
+  else: print (consolePadding+'ERROR-'+str(errorCounter)+'!!! '+str(progName)+str(errorNumber)+': '+str(errorMessage)+' on '+str(realtime)+'!'+"\n")
   sys.exit()
   return 1
 # --------------------------------------------------
@@ -156,7 +168,7 @@ def writeLog(logFile, logEntry, realtime, errorNumber, errorCounter):
 # --------------------------------------------------
 # A function to process user supplied arguments/parameters/switches.
 # Returns populated variables: autoSplit, logging, verbosity, inputFile, inputPath, refreshTime, preparedDir, pageDir
-def parseArgs(logging, verbosity, argv, errorCounter):
+def parseArgs(logging, verbosity, argv, errorCounter, realtime, centerConsoleOutput):
   autoSplit = False
   # Check if any arguments were passed.
   try: opts, args = getopt.getopt(argv,"h")
@@ -223,7 +235,7 @@ def parseArgs(logging, verbosity, argv, errorCounter):
     errorCounter += 1
     message = 'No folder path was specified'
     if logging > 0: writeLog(logFile, message, realtime, 1, errorCounter)
-    if verbosity > 0: dieGracefully(message, 1, errorCounter)
+    if verbosity > 0: dieGracefully(message, 1, errorCounter, realtime, centerConsoleOutput)
     else: sys.exit()
   # Check to see if an output delimeter was supplied.
   try: sys.argv[2]
@@ -231,7 +243,7 @@ def parseArgs(logging, verbosity, argv, errorCounter):
     errorCounter += 1
     message = 'No refresh time was specified'
     if logging > 0: writeLog(logFile, message, realtime, 2, errorCounter)
-    if verbosity > 0: dieGracefully(message, 2, errorCounter)
+    if verbosity > 0: dieGracefully(message, 2, errorCounter, realtime, centerConsoleOutput)
     else: sys.exit()
   # Check to see if an output delimeter was supplied.
   try: sys.argv[3]
@@ -239,7 +251,7 @@ def parseArgs(logging, verbosity, argv, errorCounter):
     errorCounter += 1
     message = 'No expiration time was specified'
     if logging > 0: writeLog(logFile, message, realtime, 3, errorCounter)
-    if verbosity > 0: dieGracefully(message, 3, errorCounter)
+    if verbosity > 0: dieGracefully(message, 3, errorCounter, realtime, centerConsoleOutput)
     else: sys.exit()
   else: 
     inputFile = sys.argv[1]
@@ -254,7 +266,7 @@ def parseArgs(logging, verbosity, argv, errorCounter):
       errorCounter += 1
       message = 'The folder path specified relies on an invalid directory'
       if logging > 0: writeLog(logFile, message, realtime, 4, errorCounter)
-      if verbosity > 0: dieGracefully(message, 4, errorCounter)
+      if verbosity > 0: dieGracefully(message, 4, errorCounter, realtime, centerConsoleOutput)
       else: sys.exit()
   message = ''
   return autoSplit, logging, verbosity, inputFile, inputPath, refreshTime, preparedDir, pageDir, expirationDuration
@@ -263,21 +275,21 @@ def parseArgs(logging, verbosity, argv, errorCounter):
 # --------------------------------------------------
 # A function to verify that required directories exist and create them when needed.
 # Returns 0 on error. Returns 1 if all files exist.
-def verifyDirs(inputPath, preparedDir, pageDir, realtime):
+def verifyDirs(inputPath, preparedDir, pageDir, realtime, centerConsoleOutput):
   if not os.path.exists(inputPath): 
     message = 'Creating '+str(inputPath)
     if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-    if verbosity > 1: printGracefully(logPrefix, message, realtime)
+    if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
     os.mkdir(inputPath)
   if not os.path.exists(preparedDir):
     message = 'Creating '+str(preparedDir)
     if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-    if verbosity > 1: printGracefully(logPrefix, message, realtime)
+    if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
     os.mkdir(preparedDir)
   if not os.path.exists(pageDir):
     message = 'Creating '+str(pageDir)
     if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-    if verbosity > 1: printGracefully(logPrefix, message, realtime)
+    if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
     os.mkdir(pageDir)
   message = ''
   if not os.path.exists(inputPath) or not os.path.exists(preparedDir) or not os.path.exists(pageDir):
@@ -295,18 +307,19 @@ def scanFolder(scanPath):
 # --------------------------------------------------
 # A function to detect when an input file is locked and pause until it becomes available.
 # Does not return until the input file is unlocked and ready.
-def waitForLockedFile(testFile, realtime):
+def waitForLockedFile(testFile, realtime, centerConsoleOutput):
+  realTime = setTime()
   try:
     with open(testFile, 'r') as f: pass
   except IOError as x:
     if x.errno == errno.EACCES:
       message = 'File '+str(testFile)+' is locked. Waiting'
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-      if verbosity > 1: printGracefully(logPrefix, message, realtime)
+      if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
       time.sleep(float(waitTime))
-      waitForLockedFile(testFile, realtime)
+      realtime = waitForLockedFile(testFile, realtime, centerConsoleOutput)
     testFile = message = f = x = ''
-  return 1
+  return realtime
 # --------------------------------------------------
 
 # --------------------------------------------------
@@ -314,7 +327,7 @@ def waitForLockedFile(testFile, realtime):
 # This function will execute pdfsplit on the inputPath and store individual pages in the pageDir.
 # Pages are then copied to the preparedDir when ready and deleted from PageDir.
 # Always returns 1.
-def prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDuration, realtime):
+def prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDuration, realtime, centerConsoleOutput):
   os.chdir(inputPath)
   pdfSplitPath = os.path.join(currentPath, 'pdfsplit.py')
   inputFiles = scanFolder(inputPath)
@@ -333,20 +346,20 @@ def prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDurat
     if os.path.exists(prepFilePath):
         message = 'Deleting '+str(prepFilePath)
         if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-        if verbosity > 1: printGracefully(logPrefix, message, realtime)
-        waitForLockedFile(prepFilePath, realtime)
+        if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+        realtime = waitForLockedFile(prepFilePath, realtime, centerConsoleOutput)
         os.remove(prepFilePath)
         time.sleep(float(waitTime))
     message = 'Copying '+str(pFilePath)+' to '+str(prepFilePath)
     if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-    if verbosity > 1: printGracefully(logPrefix, message, realtime)
-    waitForLockedFile(prepFilePath, realtime)
+    if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+    realtime = waitForLockedFile(prepFilePath, realtime, centerConsoleOutput)
     shutil.copyfile(pFilePath, prepFilePath)
     if os.path.getmtime(os.path.join(pageDir, pFile)) < expirationDuration:
       message = 'Deleting '+str(os.path.join(pageDir, pFile))
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
       if verbosity > 1: printGracefully(logPrefix, message, realtime)
-      waitForLockedFile(os.path.join(pageDir, pFile), realtime)
+      realtime = waitForLockedFile(os.path.join(pageDir, pFile), realtime, centerConsoleOutput)
       os.remove(os.path.join(pageDir, pFile))
   for iFile2 in inputFiles:
     if ".pdf" in iFile2:
@@ -354,11 +367,11 @@ def prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDurat
       if os.path.getmtime(inputFilePath) < expirationDuration:
         message = 'Deleting '+str(inputFilePath)
         if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-        if verbosity > 1: printGracefully(logPrefix, message, realtime)
-        waitForLockedFile(inputFilePath, realtime)
+        if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+        realtime = waitForLockedFile(inputFilePath, realtime, centerConsoleOutput)
         os.remove(inputFilePath)
   pageNumber = pdfSplitPath = commandResult = inputFiles = pageFiles = iFilePath = oFilePath = iFile = pFilePath = pFile = prepFilePath = inputFilePath = iFile2 = message = ''
-  return 1
+  return realtime
 # --------------------------------------------------
 
 # --------------------------------------------------
@@ -366,32 +379,33 @@ def prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDurat
 # This function will simply copy the files found at the inputPath to the preparedDir.
 # Originals are deleted from the inputDir. This way file locks don't interfre with new report generation.
 # Always returns 1.
-def copyReports(inputPath, preparedDir, realtime):
+def copyReports(inputPath, preparedDir, realtime, centerConsoleOutput):
   os.chdir(inputPath)
   inputFiles = scanFolder(inputPath)
   for iFile in inputFiles:
+    realtime = setTime()
     if ".pdf" in iFile:
       iFilePath = os.path.join(inputPath, iFile)
       prepFilePath = os.path.join(preparedDir, iFile)
       if os.path.exists(prepFilePath):
         message = 'Deleting '+str(prepFilePath)
         if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-        if verbosity > 1: printGracefully(logPrefix, message, realtime)
-        waitForLockedFile(prepFilePath, realtime)
+        if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+        realtime = waitForLockedFile(prepFilePath, realtime, centerConsoleOutput)
         os.remove(prepFilePath)
         time.sleep(float(waitTime))
       message = 'Copying '+str(os.path.join(inputPath, iFile))+' to '+str(os.path.join(preparedDir, iFile))
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-      if verbosity > 1: printGracefully(logPrefix, message, realtime)
-      waitForLockedFile(prepFilePath, realtime)
+      if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+      realtime = waitForLockedFile(prepFilePath, realtime, centerConsoleOutput)
       shutil.copyfile(iFilePath, prepFilePath)
       message = 'Deleting '+str(os.path.join(inputPath, iFile))
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-      if verbosity > 1: printGracefully(logPrefix, message, realtime)
-      waitForLockedFile(os.path.join(inputPath, iFile), realtime)
+      if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+      realtime = waitForLockedFile(os.path.join(inputPath, iFile), realtime, centerConsoleOutput)
       os.remove(os.path.join(inputPath, iFile))
   inputFiles = iFilePath = iFile = pFilePath = prepFilePath = message = ''
-  return 1
+  return realtime
 # --------------------------------------------------
 
 # --------------------------------------------------
@@ -400,45 +414,46 @@ def copyReports(inputPath, preparedDir, realtime):
 # Kill Adobe Acrobat once the report has been displayed for refreshTime number of seconds.
 # Once the report is done being displayed it is deleted so it cannot be displayed again.
 # Always returns 1.
-def displayReport(displayDir, realtime):
+def displayReport(displayDir, realtime, centerConsoleOutput):
   displayFiles = scanFolder(displayDir)
   verbOutput = " >nul 2>&1"
   if verbosity > 1 and silenceDependencyOutput == False: verbOutput = ''
   for displayFile in displayFiles:
+    realtime = setTime()
     displayFilePath = os.path.join(displayDir, displayFile)
     if ".pdf" in displayFilePath: 
-      waitForLockedFile(displayFilePath, realtime)
+      realtime = waitForLockedFile(displayFilePath, realtime, centerConsoleOutput)
       message = 'Opening '+str(displayFilePath)
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-      if verbosity > 1: printGracefully(logPrefix, message, realtime)
+      if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
       os.chdir(currentPath)
       displayCommandResult = os.system('start "" /max '+adobePath+' /A "pagemode=FullScreen" "'+displayFilePath+'"'+verbOutput)
       time.sleep(float(refreshTime))
       message = 'Closing '+str(displayFilePath)
       if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-      if verbosity > 1: printGracefully(logPrefix, message, realtime)
+      if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
       os.system("taskkill /im AcroRd32.exe"+verbOutput)
       time.sleep(float(waitTime*2))
-      waitForLockedFile(displayFilePath, realtime)
+      realtime = waitForLockedFile(displayFilePath, realtime, centerConsoleOutput)
       if os.path.getmtime(displayFilePath) < expirationDuration:
         message = 'Deleting '+str(displayFilePath)
         if logging > 1: writeLog(logFile, message, realtime, 0, 0)
-        if verbosity > 1: printGracefully(logPrefix, message, realtime)
-        waitForLockedFile(displayFilePath, realtime)
+        if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
+        realtime = waitForLockedFile(displayFilePath, realtime, centerConsoleOutput)
         os.remove(displayFilePath)
   displayFiles = verbOutput = displayFilePath = message = displaycommandResult = ''
-  return 1
+  return realtime
 # --------------------------------------------------
 
 # --------------------------------------------------
 # A function to display some text to kick things off.
 # Known as the welcome message.
 # Always returns 1.
-def printWelcome(logging, verbosity, realtime):
+def printWelcome(logging, verbosity, realtime, centerConsoleOutput):
   print ('\n')
   message = 'Starting '+str(progName)
   if logging > 0: writeLog(logFile, message, realtime, 0, 0)
-  if verbosity > 0: printGracefully(logPrefix, message, realtime)
+  if verbosity > 0: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
   message = ''
   return 1
 # --------------------------------------------------
@@ -447,35 +462,65 @@ def printWelcome(logging, verbosity, realtime):
 # A function to display some text to round things out.
 # Known as the goodbye message.
 # Always returns 1.
-def printGoodbye(logging, verbosity, realtime):
+def printGoodbye(logging, verbosity, realtime, centerConsoleOutput):
   message = 'Operation complete'
   if logging > 0: writeLog(logFile, message, realtime, 0, 0)
   if verbosity > 0:
-    printGracefully('', message, realtime)
+    printGracefully('', message, realtime, centerConsoleOutput)
     print("\n")
   message = ''
   return 1
 # --------------------------------------------------
 
+
+# --------------------------------------------------
+# A function to get the current buffer size of a Windows Command Prompt window.
+# Used later to center text in the console window.
+def getTermSize(centerConsoleOutput):
+  h = ctypes.windll.kernel32.GetStdHandle(-12)
+  csbi = ctypes.create_string_buffer(22)
+  k32 = ctypes.windll.LoadLibrary('C:\Windows\System32\kernel32.dll')
+  res = k32.GetConsoleScreenBufferInfo(h, csbi)
+  bufx, bufy, curx, cury, wattr, left, top, right, bottom, maxx, maxy = struct.unpack("hhhhHhhhhhh", csbi.raw)
+  sizex = right - left + 1
+  sizey = bottom - top + 1
+  if sizex < 3 or sizex < 3: centerConsoleOutput = False
+  return sizex, sizey, centerConsoleOutput
+# --------------------------------------------------
+
 # --------------------------------------------------
 # A function to print a fancy Truform logo in between iterations.
-def printLogo(verbosity):
+def printLogo(verbosity, centerConsoleOutput):
   if verbosity > 0:
     os.system("cls")
-    print ('\n')
-    print ('     ___________ _   _______ ______________  ___')
-    print ('    |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |')
-    print ('      | | | |_/ / | | | |_  | | | | |_/ / .  . |')
-    print ('      | | |    /| | | |  _| | | | |    /| |\/| |')
-    print ('      | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |')
-    print ('      \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/')
-    print ('  _____  ___________ _____ _    _  ___  ______ _____ ')
-    print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|')
-    print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ')
-    print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ')
-    print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ')
-    print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ')
-    print (' -------- '+progName+' | '+progVers+'--------')
+    if centerConsoleOutput == True:
+      print ('  ___________ _   _______ ______________  ___').center(termWidth)
+      print (' |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |').center(termWidth)
+      print ('   | | | |_/ / | | | |_  | | | | |_/ / .  . |').center(termWidth)
+      print ('   | | |    /| | | |  _| | | | |    /| |\/| |').center(termWidth)
+      print ('   | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |').center(termWidth)
+      print ('   \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/').center(termWidth)
+      print ('  _____  ___________ _____ _    _  ___  ______ _____ ').center(termWidth)
+      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|').center(termWidth)
+      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ').center(termWidth)
+      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ').center(termWidth)
+      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ').center(termWidth)
+      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ').center(termWidth)
+      print ('-------- '+progName+' | '+progVers+' --------').center(termWidth)
+    else:
+      print ('     ___________ _   _______ ______________  ___')
+      print ('    |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |')
+      print ('      | | | |_/ / | | | |_  | | | | |_/ / .  . |')
+      print ('      | | |    /| | | |  _| | | | |    /| |\/| |')
+      print ('      | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |')
+      print ('      \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/')
+      print ('  _____  ___________ _____ _    _  ___  ______ _____ ')
+      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|')
+      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ')
+      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ')
+      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ')
+      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ')
+      print ('-------- '+progName+' | '+progVers+' --------')
     print ('\n')
     return 1
 # --------------------------------------------------
@@ -483,30 +528,32 @@ def printLogo(verbosity):
 # --------------------------------------------------
 # The main portion of the program which makes use of the functions above.
 realtime = setTime()
-autoSplit, logging, verbosity, inputFile, inputPath, refreshTime, preparedDir, pageDir, expirationDuration = parseArgs(logging, verbosity, sys.argv[1:], errorCounter) 
-printLogo(verbosity)
-printWelcome(logging, verbosity, realtime)
+termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
+autoSplit, logging, verbosity, inputFile, inputPath, refreshTime, preparedDir, pageDir, expirationDuration = parseArgs(logging, verbosity, sys.argv[1:], errorCounter, realtime, centerConsoleOutput) 
+printLogo(verbosity, centerConsoleOutput)
+printWelcome(logging, verbosity, realtime, centerConsoleOutput)
 
 time.sleep(float(startupDelay))
 
 while loopCounter <= executionLimit or executionLimit == 0:
   realtime = setTime()
+  termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
   if float(time.time()) >= logoRedisplayTimer and logoRedisplayTimeLimit > 0 and verbosity > 0:
     logoRedisplayTimer = float(time.time()) + float(logoRedisplayTimeLimit)
-    printLogo(verbosity)
+    printLogo(verbosity, centerConsoleOutput)
   loopCounter += 1
-  if verifyDirs(inputPath, preparedDir, pageDir, realtime) > 0:
+  if verifyDirs(inputPath, preparedDir, pageDir, realtime, centerConsoleOutput) > 0:
     if autoSplit == True:
-      prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDuration, realtime)
-      displayReport(preparedDir, realtime)     
+      realtime = prepareReports(currentPath, inputPath, preparedDir, pageDir, expirationDuration, realtime, centerConsoleOutput)
+      realtime = displayReport(preparedDir, realtime, centerConsoleOutput)     
     else:
-      copyReports(inputPath, preparedDir, realtime)
-      displayReport(preparedDir, realtime)
+      realtime = copyReports(inputPath, preparedDir, realtime, centerConsoleOutput)
+      realtime = displayReport(preparedDir, realtime, centerConsoleOutput)
   else:
       message = 'Could not verify required directories'
       if logging > 0: writeLog(logFile, message, realtime, 5, errorCounter)
-      if verbosity > 0: dieGracefully(message, 5, errorCounter)
+      if verbosity > 0: dieGracefully(message, 5, errorCounter, realtime, centerConsoleOutput)
       else: sys.exit()
 
-printGoodbye(logging, verbosity, realtime)
+printGoodbye(logging, verbosity, realtime, centerConsoleOutput)
 # --------------------------------------------------

@@ -31,12 +31,12 @@ StringFileInfo(
     u'040904B0',
     [StringStruct(u'CompanyName', u'Tru Form Precision Manufacturing'),
     StringStruct(u'FileDescription', u'Display Board Updater Client'),
-    StringStruct(u'FileVersion', u'2.3.0.0'),
+    StringStruct(u'FileVersion', u'2.5.0.0'),
     StringStruct(u'InternalName', u'Display_Board_Updater_Client'),
     StringStruct(u'LegalCopyright', u'Copyright (c) Tru Form Precision Manufacturing'),
     StringStruct(u'OriginalFilename', u'Display_Board_Updater_Client.exe'),
     StringStruct(u'ProductName', u'Display_Board_Updater_Client'),
-    StringStruct(u'ProductVersion', u'v2.3.0')])
+    StringStruct(u'ProductVersion', u'v2.5.0')])
   ]), 
 VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
