@@ -359,7 +359,7 @@ def waitForLockedFile(logPrefix, testFile, realtime, centerConsoleOutput):
   # Attempt to open the specified file.
   try:
     with open(testFile, 'r') as f: pass
-  # Catch the error that is generated if we cannot open the specified file.
+  # Catch the result of the above operation.
   except IOError as x:
     # Check if any errors were caught during the file operation above.
     if x.errno == errno.EACCES:
