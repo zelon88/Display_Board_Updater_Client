@@ -8,9 +8,9 @@ AUTHOR: Justin Grimes
 
 ORIGINAL VERSION DATE: 1/14/2020
 
-CURRENT VERSION DATE: 2/10/2020
+CURRENT VERSION DATE: 2/12/2020
 
-VERSION: v2.5
+VERSION: v2.5.5
 
 DEPENDENCIES:
 1. Python2.7 (https://www.python.org/download/releases/2.7/)
