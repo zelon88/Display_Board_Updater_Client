@@ -366,7 +366,7 @@ def waitForLockedFile(logPrefix, testFile, realtime, centerConsoleOutput):
       message = 'File '+str(testFile)+' is locked. Waiting'
       if logging > 1: writeLog(logPrefix, logFile, message, realtime, 0, 0)
       if verbosity > 1: printGracefully(logPrefix, message, realtime, centerConsoleOutput)
-      # If errirs were encountered trying to open the specified file, sleep for waitTime duration.
+      # If errios were encountered trying to open the specified file, sleep for waitTime duration.
       time.sleep(float(waitTime))
       # Reset current time & re-exdcute this function.
       realtime = waitForLockedFile(logPrefix, testFile, realtime, centerConsoleOutput)
