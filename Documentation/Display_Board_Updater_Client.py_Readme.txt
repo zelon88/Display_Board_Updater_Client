@@ -10,7 +10,7 @@ ORIGINAL VERSION DATE: 1/14/2020
 
 CURRENT VERSION DATE: 2/20/2020
 
-VERSION: v2.7
+VERSION: v2.8
 
 DEPENDENCIES:
 1. Python2.7 (https://www.python.org/download/releases/2.7/)

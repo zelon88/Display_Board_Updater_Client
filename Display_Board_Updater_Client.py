@@ -1,6 +1,6 @@
 # --------------------------------------------------
 # Display_Board_Updater_Client.py
-# v2.7 - 2/20/2020
+# v2.8 - 2/20/2020
 
 # Justin Grimes (@zelon88)
 #   https://www.HonestRepair.net
@@ -61,7 +61,7 @@ progFileName = "Display_Board_Updater_Client.py"
 # The full name of this application.
 progName = "Display_Board_Updater_Client"
 # The current version of this application.
-progVers = "v2.7"
+progVers = "v2.8"
 # A concise description of this application.
 progDesc = 'This program prepares the data created by Display_Board_Updater_Server and displays it in full screen for shop floor dashboards.'
 # The following value controls the characters to use for padding before writing console output.
@@ -282,44 +282,39 @@ def parseArgs(logPrefix, logging, verbosity, argv, errorCounter, realtime, cente
   except IndexError:
     errorCounter += 1
     message = 'No folder path was specified'
-    if logging > 0: writeLog(logPrefix, logFile, message, realtime, 1, errorCounter)
-    if verbosity > 0: dieGracefully(consolePadding, message, 1, errorCounter, realtime, centerConsoleOutput)
-    else: sys.exit()
+    logAndDie(consolePadding, 0, 0, message, logFile, logPrefix, realtime, 1, errorCounter, silenceDependencyOutput, centerConsoleOutput)
+    sys.exit(1)
   # Check to see if an output delimeter was supplied.
   try: sys.argv[2]
   except IndexError:
     errorCounter += 1
     message = 'No refresh time was specified'
-    if logging > 0: writeLog(logPrefix, logFile, message, realtime, 2, errorCounter)
-    if verbosity > 0: dieGracefully(consolePadding, message, 2, errorCounter, realtime, centerConsoleOutput)
-    else: sys.exit()
+    logAndDie(consolePadding, 0, 0, message, logFile, logPrefix, realtime, 2, errorCounter, silenceDependencyOutput, centerConsoleOutput)
+    sys.exit(2)
   # Check to see if an output delimeter was supplied.
   try: sys.argv[3]
   except IndexError:
     errorCounter += 1
     message = 'No expiration time was specified'
-    if logging > 0: writeLog(logPrefix, logFile, message, realtime, 3, errorCounter)
-    if verbosity > 0: dieGracefully(consolePadding, message, 3, errorCounter, realtime, centerConsoleOutput)
-    else: sys.exit()
-  else: 
-    # Define the first argument & set associated file & directory variables.
-    inputFile = sys.argv[1]
-    inputPath = inputFile
-    preparedDir = os.path.join(inputPath, "Prepared")
-    pageDir = os.path.join(preparedDir, "Pages")
-    # Define the second argument & set associated time related variable.
-    refreshTime = int(sys.argv[2])
-    # Define the third argument & set associated time related variable.
-    expirationDuration = float(time.time() - float(sys.argv[3]))
-    # Check to see that required directories exist & create them where required.
-    if not os.path.exists(inputPath):
-      # "ERROR-<#>!!! Display_Board_Updater_Client109, The output file specified relies on an invalid directory on <time>."
-      errorCounter += 1
-      message = 'The folder path specified relies on an invalid directory'
-      if logging > 0: writeLog(logPrefix, logFile, message, realtime, 4, errorCounter)
-      if verbosity > 0: dieGracefully(consolePadding, message, 4, errorCounter, realtime, centerConsoleOutput)
-      # Kill the interpreter.
-      else: sys.exit()
+    logAndDie(consolePadding, 0, 0, message, logFile, logPrefix, realtime, 3, errorCounter, silenceDependencyOutput, centerConsoleOutput)
+    sys.exit(3) 
+  # Define the first argument & set associated file & directory variables.
+  inputFile = sys.argv[1]
+  inputPath = inputFile
+  preparedDir = os.path.join(inputPath, "Prepared")
+  pageDir = os.path.join(preparedDir, "Pages")
+  # Define the second argument & set associated time related variable.
+  refreshTime = int(sys.argv[2])
+  # Define the third argument & set associated time related variable.
+  expirationDuration = float(time.time() - float(sys.argv[3]))
+  # Check to see that required directories exist & create them where required.
+  if not os.path.exists(inputPath):
+    # "ERROR-<#>!!! Display_Board_Updater_Client109, The output file specified relies on an invalid directory on <time>."
+    errorCounter += 1
+    message = 'The folder path specified relies on an invalid directory'
+    logAndDie(consolePadding, 0, 0, message, logFile, logPrefix, realtime, 4, errorCounter, silenceDependencyOutput, centerConsoleOutput)
+    # Kill the interpreter.
+    sys.exit(4)
   os.system("cls")
   message = 'Arguments parsed:  \n  Input-Directory='+str(inputPath)+', \n  Refresh-Time='+str(refreshTime)+', \n  Expiration-Time='+str(expirationDuration)+', \n  AutoSplit='+str(autoSplit)+', \n  Verbosity='+str(verbosity)+', \n  Logging='+str(logging)
   logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
@@ -416,26 +411,35 @@ def prepareReports(logPrefix, currentPath, inputPath, preparedDir, pageDir, expi
     if os.path.exists(prepFilePath):
         message = 'Deleting '+str(prepFilePath)
         logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-        realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
-        os.remove(prepFilePath)
+        try: os.remove(prepFilePath)
+        except OSError: 
+          realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
+          os.remove(prepFilePath)
         time.sleep(float(waitTime))
     message = 'Copying '+str(pFilePath)+' to '+str(prepFilePath)
     logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-    realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
-    shutil.copyfile(pFilePath, prepFilePath)
+    try: shutil.copyfile(pFilePath, prepFilePath)
+    except shutil.Error:
+      realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
+      realtime = waitForLockedFile(logPrefix, pFilePath, realtime, centerConsoleOutput)
+      shutil.copyfile(pFilePath, prepFilePath)
     if os.path.getmtime(os.path.join(pageDir, pFile)) < expirationDuration:
       message = 'Deleting '+str(os.path.join(pageDir, pFile))
       logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-      realtime = waitForLockedFile(logPrefix, os.path.join(pageDir, pFile), realtime, centerConsoleOutput)
-      os.remove(os.path.join(pageDir, pFile))
+      try: os.remove(os.path.join(pageDir, pFile))
+      except OSError:
+        realtime = waitForLockedFile(logPrefix, os.path.join(pageDir, pFile), realtime, centerConsoleOutput)
+        os.remove(os.path.join(pageDir, pFile))
   for iFile2 in inputFiles:
     if ".pdf" in iFile2:
       inputFilePath = os.path.join(inputPath, iFile2)
       if os.path.getmtime(inputFilePath) < expirationDuration:
         message = 'Deleting '+str(inputFilePath)
         logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-        realtime = waitForLockedFile(logPrefix, inputFilePath, realtime, centerConsoleOutput)
-        os.remove(inputFilePath)
+        try: os.remove(inputFilePath)
+        except OSError:
+          realtime = waitForLockedFile(logPrefix, inputFilePath, realtime, centerConsoleOutput)
+          os.remove(inputFilePath)
   pageNumber = pdfSplitPath = commandResult = inputFiles = pageFiles = iFilePath = oFilePath = iFile = pFilePath = pFile = prepFilePath = inputFilePath = iFile2 = message = ''
   return realtime
 # --------------------------------------------------
@@ -456,17 +460,24 @@ def copyReports(logPrefix, inputPath, preparedDir, realtime, centerConsoleOutput
       if os.path.exists(prepFilePath):
         message = 'Deleting '+str(prepFilePath)
         logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-        realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
-        os.remove(prepFilePath)
+        try: os.remove(prepFilePath)
+        except OSError:
+          realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
+          os.remove(prepFilePath)
         time.sleep(float(waitTime))
       message = 'Copying '+str(os.path.join(inputPath, iFile))+' to '+str(os.path.join(preparedDir, iFile))
       logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-      realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
-      shutil.copyfile(iFilePath, prepFilePath)
+      try: shutil.copyfile(iFilePath, prepFilePath)
+      except shutil.Error: 
+        realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
+        realtime = waitForLockedFile(logPrefix, iFilePath, realtime, centerConsoleOutput)
+        shutil.copyfile(iFilePath, prepFilePath)
       message = 'Deleting '+str(os.path.join(inputPath, iFile))
       logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-      realtime = waitForLockedFile(logPrefix, os.path.join(inputPath, iFile), realtime, centerConsoleOutput)
-      os.remove(os.path.join(inputPath, iFile))
+      try: os.remove(os.path.join(inputPath, iFile))
+      except OSError:
+        realtime = waitForLockedFile(logPrefix, os.path.join(inputPath, iFile), realtime, centerConsoleOutput)
+        os.remove(os.path.join(inputPath, iFile))
   inputFiles = iFilePath = iFile = pFilePath = prepFilePath = message = ''
   return realtime
 # --------------------------------------------------
@@ -499,8 +510,10 @@ def displayReport(logPrefix, displayDir, realtime, centerConsoleOutput):
       if os.path.getmtime(displayFilePath) < expirationDuration:
         message = 'Deleting '+str(displayFilePath)
         logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
-        realtime = waitForLockedFile(logPrefix, displayFilePath, realtime, centerConsoleOutput)
-        os.remove(displayFilePath)
+        try: os.remove(displayFilePath)
+        except OSError:
+          realtime = waitForLockedFile(logPrefix, displayFilePath, realtime, centerConsoleOutput)
+          os.remove(displayFilePath)
   displayFiles = verbOutput = displayFilePath = message = displaycommandResult = ''
   return realtime
 # --------------------------------------------------
