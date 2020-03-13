@@ -1,6 +1,6 @@
 # --------------------------------------------------
 # Display_Board_Updater_Client.py
-# v2.8 - 2/20/2020
+# v3.0 - 3/13/2020
 
 # Justin Grimes (@zelon88)
 #   https://www.HonestRepair.net
@@ -53,7 +53,7 @@
 
 # --------------------------------------------------
 # Load required modules and set global variables.
-import sys, getopt, time, datetime, os, shutil, errno, struct, ctypes
+import sys, getopt, time, datetime, os, shutil, errno, struct, ctypes, colorama
 
 # -----DEFAULT CONFIGURATION SETTINGS----- # 
 # The filename of this application.
@@ -61,7 +61,7 @@ progFileName = "Display_Board_Updater_Client.py"
 # The full name of this application.
 progName = "Display_Board_Updater_Client"
 # The current version of this application.
-progVers = "v2.8"
+progVers = "v3.0"
 # A concise description of this application.
 progDesc = 'This program prepares the data created by Display_Board_Updater_Server and displays it in full screen for shop floor dashboards.'
 # The following value controls the characters to use for padding before writing console output.
@@ -83,7 +83,7 @@ verbosity = 2
 # A short delay in seconds to wait between the start of this program and the first scan on the target.
 startupDelay = 10
 # In the absence of an "expiration time", the following default value defines the number of seconds to store reports before deleting them.
-expirationDuration = float(time.time()) - (60 * 60)  # 60sec x 60min = 1hour
+expirationDuration = time.time() - (60 * 60)  # 60sec x 60min = 1hour
 # The following integer determines an upper boundary for the main loop of this program.
 # If defined, the main loop of this program will execute this many times before stopping.
 # Set to 0 to enable non-stop execution.
@@ -99,11 +99,11 @@ waitTime = 2
 centerConsoleOutput = True
 # The following equation should equal the number of seconds after start of program execution before the logo is redisplayed.
 # Set to 0 to never redisplay the logo. 
-logoRedisplayTimeLimit = 60 * 7 # 60sec x 10min = 10min 
+logoRedisplayTimeLimit = 60 * 2 # 60sec x 10min = 10min 
 # The installation directory where this application is installed.
 # This configuration entry shold be considered a "hard-coded" installation path.
 # This is the preferred method of defining the installation path for this application.
-currentPath = "C:\Display_Board_Updater_Client"
+currentPath = "C:\Users\JGrimes\Desktop\Display_Board_Updater_Client"
 # The installation directory where this application is installed.
 # It's best to hard-code paths with the configuration entry below.
 # If you need to specify this configuration entry uncomment, de-space, and populate the line below with the path. 
@@ -119,7 +119,7 @@ logFile = os.path.join(currentPath, 'Display_Board_Updater_Client.log')
 # -----END DEFAULT CONFIGURATION SETTINGS----- # 
 
 # Set default variables for the session.
-logoRedisplayTimer = float(time.time()) + float(logoRedisplayTimeLimit)
+logoRedisplayTimer = time.time()+float(logoRedisplayTimeLimit)
 error = inputFile = inputPath = preparedDir = pageDir = ''
 errorCounter = loopCounter = actionCounter = 0
 # --------------------------------------------------
@@ -137,7 +137,6 @@ def setTime():
 
 # --------------------------------------------------
 # A function to print output to the console in a consistent manner.
-# Always returns 1.
 def printGracefully(consolePadding, logPrefix, message, realtime, centerConsoleOutput):
   # Detect if the centerConsoleOutput configuration variable is set.
   if centerConsoleOutput == True: 
@@ -187,7 +186,7 @@ def writeLog(logPrefix, logFile, logEntry, realtime, errorNumber, errorCounter):
   entrySufix = ' on '+str(realtime)+'.'
   # Open the logFile in the defined file mode and write the specified data to it.
   with open(logFile, append) as logData:
-    logData.write(entryPrefix+logEntry+entrySufix+"\n")
+    logData.write(entryPrefix+logEntry+entrySufix+"\r\n")
     logData.close
   # Clear unneeded memory.
   logEntry = logData = ''
@@ -205,8 +204,8 @@ def logAndPrint(consolePadding, msgLogLevel, msgVerbLevel, message, logFile, log
 # --------------------------------------------------
 # A function to combine the writeLog and dieGracefully functions into one.
 def logAndDie(consolePadding, msgLogLevel, msgVerbLevel, message, logFile, logPrefix, realtime, errorNumber, errorCounter, silenceDependencyOutput, centerConsoleOutput):
-  if logging > msgLogLevel: writeLog(logFile, message, realtime, errorNumber, errorCounter)
-  if verbosity > msgVerbLevel: dieGracefully(consolePadding, message, errorNumber, errorCounter, realtime, silenceDependencyOutput, False)
+  if logging > msgLogLevel: writeLog(logPrefix, logFile, message, realtime, errorNumber, errorCounter)
+  if verbosity > msgVerbLevel: dieGracefully(consolePadding, message, errorNumber, errorCounter, realtime, False)
   return 1
 # --------------------------------------------------
 
@@ -464,7 +463,7 @@ def copyReports(logPrefix, inputPath, preparedDir, realtime, centerConsoleOutput
         except OSError:
           realtime = waitForLockedFile(logPrefix, prepFilePath, realtime, centerConsoleOutput)
           os.remove(prepFilePath)
-        time.sleep(float(waitTime))
+        time.sleep(float(waitTime/2))
       message = 'Copying '+str(os.path.join(inputPath, iFile))+' to '+str(os.path.join(preparedDir, iFile))
       logAndPrint(consolePadding, 1, 1, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
       try: shutil.copyfile(iFilePath, prepFilePath)
@@ -557,8 +556,8 @@ def getTermSize(centerConsoleOutput):
   k32 = ctypes.windll.LoadLibrary('C:\Windows\System32\kernel32.dll')
   res = k32.GetConsoleScreenBufferInfo(h, csbi)
   bufx, bufy, curx, cury, wattr, left, top, right, bottom, maxx, maxy = struct.unpack("hhhhHhhhhhh", csbi.raw)
-  sizex = right - left + 1
-  sizey = bottom - top + 1
+  sizex = right - left+1
+  sizey = bottom - top+1
   if sizex < 3 or sizex < 3: centerConsoleOutput = False
   return sizex, sizey, centerConsoleOutput
 # --------------------------------------------------
@@ -569,40 +568,50 @@ def printLogo(verbosity, centerConsoleOutput):
   if verbosity > 0:
     os.system("cls")
     if centerConsoleOutput == True:
-      print ('  ___________ _   _______ ______________  ___').center(termWidth)
-      print (' |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |').center(termWidth)
-      print ('   | | | |_/ / | | | |_  | | | | |_/ / .  . |').center(termWidth)
-      print ('   | | |    /| | | |  _| | | | |    /| |\/| |').center(termWidth)
-      print ('   | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |').center(termWidth)
-      print ('   \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/').center(termWidth)
-      print ('  _____  ___________ _____ _    _  ___  ______ _____ ').center(termWidth)
-      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|').center(termWidth)
-      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ').center(termWidth)
-      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ').center(termWidth)
-      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ').center(termWidth)
-      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ').center(termWidth)
-      print ('-------- '+progName+' | '+progVers+' --------').center(termWidth)
+      print ('\n')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'   Tm                                                                                                                                                  \r').center(termWidth+27)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'    fMpfMMMMTTTTTT                                                                                                                                     \r').center(termWidth+27)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'    MMM MM                                                                                                                                             \r').center(termWidth+27)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'  mMMT MMp     '+colorama.Fore.BLUE+colorama.Style.DIM+'fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'TTT   MMMM     '+colorama.Fore.BLUE+colorama.Style.DIM+'fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'       TMMMp               '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'  TTTMMMMp TMMp            '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'        TMMm MMMMMMMMMMM   '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'          MMm TMMT mMMm    '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMMMMMMMMMMMM          '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'           MM    MMMTTTTM  '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMMMMMMMMMMMM          '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'           f    MF         '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM       MMMMMMMMM       MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM         MMMMM         MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM          TMT          MMMMM').center(termWidth+25)
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMM                     '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM                       MMMMM').center(termWidth+25)
+      print ('\n')
+      print (colorama.Fore.BLUE+colorama.Style.DIM+'----------------------------------------------- '+colorama.Fore.WHITE+colorama.Style.NORMAL+progName+' | '+progVers+colorama.Fore.BLUE+colorama.Style.DIM+' -------------------------------------------------'+colorama.Fore.WHITE+colorama.Style.NORMAL).center(termWidth+36)
     else:
-      print ('     ___________ _   _______ ______________  ___')
-      print ('    |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |')
-      print ('      | | | |_/ / | | | |_  | | | | |_/ / .  . |')
-      print ('      | | |    /| | | |  _| | | | |    /| |\/| |')
-      print ('      | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |')
-      print ('      \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/')
-      print ('  _____  ___________ _____ _    _  ___  ______ _____ ')
-      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|')
-      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ')
-      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ')
-      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ')
-      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ')
-      print ('-------- '+progName+' | '+progVers+' --------')
+      print ('\n')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'   Tm                                                                                                                                                  ')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'    fMpfMMMMTTTTTT                                                                                                                                     ')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'    MMM MM                                                                                                                                             ')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'  mMMT MMp     '+colorama.Fore.BLUE+colorama.Style.DIM+'fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'TTT   MMMM     '+colorama.Fore.BLUE+colorama.Style.DIM+'fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'       TMMMp               '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'  TTTMMMMp TMMp            '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'        TMMm MMMMMMMMMMM   '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'          MMm TMMT mMMm    '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMMMMMMMMMMMM          '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'           MM    MMMTTTTM  '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMMMMMMMMMMMM          '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'           f    MF         '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM       MMMMMMMMM       MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM         MMMMM         MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMMp                    '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM          TMT          MMMMM')
+      print (colorama.Fore.BLACK+colorama.Style.BRIGHT+'                           '+colorama.Fore.BLUE+colorama.Style.DIM+'MMMMMM            fMMMMM                     '+colorama.Fore.BLACK+colorama.Style.BRIGHT+'MMMMMM                     fMMMM                       MMMMM')
+      print ('\n')
+      print (colorama.Fore.BLUE+colorama.Style.DIM+'----------------------------------------------- '+colorama.Fore.WHITE+colorama.Style.NORMAL+progName+' | '+progVers+colorama.Fore.BLUE+colorama.Style.DIM+' -------------------------------------------------'+colorama.Fore.WHITE+colorama.Style.NORMAL)
     print ('\n')
+    print(colorama.Fore.WHITE+colorama.Style.NORMAL)
     return 1
 # --------------------------------------------------
 
 # --------------------------------------------------
 # The main portion of the program which makes use of the functions above.
 try:
+  colorama.init()
   realtime = setTime()
   termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
   autoSplit, logging, verbosity, inputFile, inputPath, refreshTime, preparedDir, pageDir, expirationDuration = parseArgs(logPrefix, logging, verbosity, sys.argv[1:], errorCounter, realtime, centerConsoleOutput) 
@@ -614,8 +623,8 @@ try:
   while loopCounter <= executionLimit or executionLimit == 0:
     realtime = setTime()
     termWidth, termHeight, centerConsoleOutput = getTermSize(centerConsoleOutput)
-    if float(time.time()) >= logoRedisplayTimer and logoRedisplayTimeLimit > 0 and verbosity > 0:
-      logoRedisplayTimer = float(time.time()) + float(logoRedisplayTimeLimit)
+    if time.time() >= logoRedisplayTimer and logoRedisplayTimeLimit > 0 and verbosity > 0:
+      logoRedisplayTimer = time.time()+float(logoRedisplayTimeLimit)
       printLogo(verbosity, centerConsoleOutput)
     loopCounter += 1
     if verifyDirs(logPrefix, inputPath, preparedDir, pageDir, realtime, centerConsoleOutput) > 0:
@@ -633,9 +642,7 @@ except KeyboardInterrupt:
   message = 'Ctrl+C detected. Halting execution'
   logAndPrint(consolePadding, 0, 0, message, logFile, logPrefix, realtime, 0, 0, centerConsoleOutput)
   printGoodbye(logPrefix, logging, verbosity, realtime, centerConsoleOutput)
-  try:
-    sys.exit(0)
-  except SystemExit:
-    os._exit(0)
-
+  print(colorama.Style.RESET_ALL)
+  try: sys.exit(0)
+  except SystemExit: os._exit(0)
 # --------------------------------------------------

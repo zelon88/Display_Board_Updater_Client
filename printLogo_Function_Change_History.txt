@@ -1,0 +1,139 @@
+
+# ========================================================================================================================================================================================================
+
+# v3.0 - Removed on 3/13/2020, Justin Grimes
+# --------------------------------------------------
+# A function to print a fancy Truform logo in between iterations.
+def printLogo(verbosity, centerConsoleOutput):
+  if verbosity > 0:
+    os.system("cls")
+    if centerConsoleOutput == True:
+      print ('\n')
+      print ('\n')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '   Tm                                                                                                                                                  ').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '    fMpfMMMMTTTTTT                                                                                                                                     ').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '    MMM MM                                                                                                                                             ').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '  mMMT MMp     ' + colorama.Fore.BLUE + colorama.Style.DIM + 'fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + 'TTT   MMMM     ' + colorama.Fore.BLUE + colorama.Style.DIM + 'fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '       TMMMp               ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '  TTTMMMMp TMMp            ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '        TMMm MMMMMMMMMMM   ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '          MMm TMMT mMMm    ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMMMMMMMMMMMM          ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '           MM    MMMTTTTM  ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMMMMMMMMMMMM          ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '           f    MF         ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM       MMMMMMMMM       MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM         MMMMM         MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM          TMT          MMMMM').center(termWidth + 25)
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMM                     ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM                       MMMMM').center(termWidth + 25)
+      print ('\n')
+      print (colorama.Fore.BLUE + colorama.Style.DIM + '----------------------------------------------- ' + colorama.Fore.WHITE + colorama.Style.NORMAL + progName + ' | ' + progVers + colorama.Fore.BLUE + colorama.Style.DIM + ' -------------------------------------------------' + colorama.Fore.WHITE + colorama.Style.NORMAL).center(termWidth + 36)
+    else:
+      print ('\n')
+      print ('\n')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '   Tm                                                                                                                                                  ')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '    fMpfMMMMTTTTTT                                                                                                                                     ')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '    MMM MM                                                                                                                                             ')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '  mMMT MMp     ' + colorama.Fore.BLUE + colorama.Style.DIM + 'fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + 'TTT   MMMM     ' + colorama.Fore.BLUE + colorama.Style.DIM + 'fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '       TMMMp               ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '  TTTMMMMp TMMp            ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '        TMMm MMMMMMMMMMM   ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '          MMm TMMT mMMm    ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMMMMMMMMMMMM          ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '           MM    MMMTTTTM  ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMMMMMMMMMMMM          ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '           f    MF         ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM       MMMMMMMMM       MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM         MMMMM         MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMMp                    ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM          TMT          MMMMM')
+      print (colorama.Fore.BLACK + colorama.Style.BRIGHT + '                           ' + colorama.Fore.BLUE + colorama.Style.DIM + 'MMMMMM            fMMMMM                     ' + colorama.Fore.BLACK + colorama.Style.BRIGHT + 'MMMMMM                     fMMMM                       MMMMM')
+      print ('\n')
+      print (colorama.Fore.BLUE + colorama.Style.DIM + '----------------------------------------------- ' + colorama.Fore.WHITE + colorama.Style.NORMAL + progName + ' | ' + progVers + colorama.Fore.BLUE + colorama.Style.DIM + ' -------------------------------------------------' + colorama.Fore.WHITE + colorama.Style.NORMAL)
+    print ('\n')
+    print(colorama.Fore.WHITE + colorama.Style.NORMAL)
+    return 1
+# --------------------------------------------------
+
+# ========================================================================================================================================================================================================
+
+# v2.9 - Removed on 3/13/2020, Justin Grimes
+# --------------------------------------------------
+# A function to print a fancy Truform logo in between iterations.
+def printLogo(verbosity, centerConsoleOutput):
+  if verbosity > 0:
+    os.system("cls")
+    if centerConsoleOutput == True:
+      print ('')
+      print ('')
+      print ('   Tm                                                                                                                               ').center(termWidth)
+      print ('    fMpfMMMMTTTTTT                                                                                                                  ').center(termWidth)
+      print ('    MMM MM                                                                                                                          ').center(termWidth)
+      print ('  mMMT MMp     fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM').center(termWidth)
+      print ('TTT   MMMM     fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM').center(termWidth)
+      print ('       TMMMp               MMMMMM            fMMMMMp                    MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM').center(termWidth)
+      print ('  TTTMMMMp TMMp            MMMMMM            fMMMMMp                    MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM').center(termWidth)
+      print ('        TMMm MMMMMMMMMMM   MMMMMM            fMMMMMp                    MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM').center(termWidth)
+      print ('          MMm TMMT mMMm    MMMMMM            fMMMMMMMMMMMMMMMM          MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM').center(termWidth)
+      print ('           MM    MMMTTTTM  MMMMMM            fMMMMMMMMMMMMMMMM          MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM').center(termWidth)
+      print ('           f    MF         MMMMMM            fMMMMMp                    MMMMMM                     fMMMM       MMMMMMMMM       MMMMM').center(termWidth)
+      print ('                           MMMMMM            fMMMMMp                    MMMMMM                     fMMMM         MMMMM         MMMMM').center(termWidth)
+      print ('                           MMMMMM            fMMMMMp                    MMMMMM                     fMMMM          TMT          MMMMM').center(termWidth)
+      print ('                           MMMMMM            fMMMMM                     MMMMMM                     fMMMM                       MMMMM').center(termWidth)
+      print ('----------------------------------------------- '+progName+' | '+progVers+' -------------------------------------------------').center(termWidth)
+    else:
+      print ('')
+      print ('')
+      print ('   Tm                                                                                                                               ')
+      print ('    fMpfMMMMTTTTTT                                                                                                                  ')
+      print ('    MMM MM                                                                                                                          ')
+      print ('  mMMT MMp     fMMMMMMMMMMMMMMMMMMMMMMMMMMMM fMMMMMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMMMm  fMMMMM                      MMMMM')
+      print ('TTT   MMMM     fMMMMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMMMMMMMMMMMMMMMMMMMM MMMMMMMMMMMMMMMMMMMMMMMMMMpfMMMMMMM                  MMMMMMM')
+      print ('       TMMMp               MMMMMM            fMMMMMp                    MMMMMM               MMMMMMfMMMMMMMMM              MMMMMMMMM')
+      print ('  TTTMMMMp TMMp            MMMMMM            fMMMMMp                    MMMMMM               fMMMMMfMMMMMMMMMMp          mMMMMMMMMMM')
+      print ('        TMMm MMMMMMMMMMM   MMMMMM            fMMMMMp                    MMMMMM               MMMMMMfMMMMpTMMMMMMp      pMMMMM  MMMMM')
+      print ('          MMm TMMT mMMm    MMMMMM            fMMMMMMMMMMMMMMMM          MMMMMMMMMMMMMMMMMMMMMMMMMMMfMMMM   TMMMMMM   pMMMMMM   MMMMM')
+      print ('           MM    MMMTTTTM  MMMMMM            fMMMMMMMMMMMMMMMM          MMMMMMMMMMMMMMMMMMMMMMMMM  fMMMM     TMMMMMMMMMMMM     MMMMM')
+      print ('           f    MF         MMMMMM            fMMMMMp                    MMMMMM                     fMMMM       MMMMMMMMM       MMMMM')
+      print ('                           MMMMMM            fMMMMMp                    MMMMMM                     fMMMM         MMMMM         MMMMM')
+      print ('                           MMMMMM            fMMMMMp                    MMMMMM                     fMMMM          TMT          MMMMM')
+      print ('                           MMMMMM            fMMMMM                     MMMMMM                     fMMMM                       MMMMM')
+      print ('----------------------------------------------- '+progName+' | '+progVers+' -------------------------------------------------')
+    print ('\n')
+    return 1
+# --------------------------------------------------
+
+# ========================================================================================================================================================================================================
+
+# v2.8 - Removed on 3/13/2020, Justin Grimes
+# --------------------------------------------------
+# A function to print a fancy Truform logo in between iterations.
+def printLogo(verbosity, centerConsoleOutput):
+  if verbosity > 0:
+    os.system("cls")
+    if centerConsoleOutput == True:
+      print ('  ___________ _   _______ ______________  ___').center(termWidth)
+      print (' |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |').center(termWidth)
+      print ('   | | | |_/ / | | | |_  | | | | |_/ / .  . |').center(termWidth)
+      print ('   | | |    /| | | |  _| | | | |    /| |\/| |').center(termWidth)
+      print ('   | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |').center(termWidth)
+      print ('   \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/').center(termWidth)
+      print ('  _____  ___________ _____ _    _  ___  ______ _____ ').center(termWidth)
+      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|').center(termWidth)
+      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ').center(termWidth)
+      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ').center(termWidth)
+      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ').center(termWidth)
+      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ').center(termWidth)
+      print ('-------- '+progName+' | '+progVers+' --------').center(termWidth)
+    else:
+      print ('     ___________ _   _______ ______________  ___')
+      print ('    |_   _| ___ \ | | |  ___|  _  | ___ \  \/  |')
+      print ('      | | | |_/ / | | | |_  | | | | |_/ / .  . |')
+      print ('      | | |    /| | | |  _| | | | |    /| |\/| |')
+      print ('      | | | |\ \| |_| | |   \ \_/ / |\ \| |  | |')
+      print ('      \_/ \_| \_|\___/\_|    \___/\_| \_\_|  |_/')
+      print ('  _____  ___________ _____ _    _  ___  ______ _____ ')
+      print (' /  ___||  _  |  ___|_   _| |  | |/ _ \ | ___ \  ___|')
+      print (' \ `--. | | | | |_    | | | |  | / /_\ \| |_/ / |__  ')
+      print ('  `--. \| | | |  _|   | | | |/\| |  _  ||    /|  __| ')
+      print (' /\__/ /\ \_/ / |     | | \  /\  / | | || |\ \| |___ ')
+      print (' \____/  \___/\_|     \_/  \/  \/\_| |_/\_| \_\____/ ')
+      print ('-------- '+progName+' | '+progVers+' --------')
+    print ('\n')
+    return 1
+# --------------------------------------------------
